@@ -156,7 +156,13 @@ class Cam {
         fill(255, 100, 100);
         ellipse(closestPoint.x, closestPoint.y, 3, 3);
         line(this.pos.x, this.pos.y, closestPoint.x, closestPoint.y);
-        this.rays[i].castDistance = closestDistance;
+        var middleI = this.raysCount / 2;
+        if (i < middleI) {
+          
+        }
+        
+        this.rays[i].castDistance = closestDistance * cos(i*2/180);
+        
       }
     }
 
@@ -179,7 +185,7 @@ class Cam {
     for (var i = 0; i < this.raysCount; i++) {
       var dist = this.rays[i].castDistance;
 
-      fill(255 - dist * 0.4 * height / 200);
+      fill(255 - dist * 0.3 * height / 200);
       noStroke();
       
       var pos_x = 400 + i * height / this.raysCount;
@@ -226,7 +232,6 @@ function draw() {
   cam.move();
   cam.lookAt(mouseX, mouseY);
   cam.show();
-
   cam.render();
 
 }
