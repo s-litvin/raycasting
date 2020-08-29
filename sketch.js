@@ -156,11 +156,7 @@ class Cam {
         fill(255, 100, 100);
         ellipse(closestPoint.x, closestPoint.y, 3, 3);
         line(this.pos.x, this.pos.y, closestPoint.x, closestPoint.y);
-        var middleI = this.raysCount / 2;
-        if (i < middleI) {
-          
-        }
-        
+     
         this.rays[i].castDistance = closestDistance * cos(i*2/180);
         
       }
@@ -232,6 +228,7 @@ function draw() {
   cam.move();
   cam.lookAt(mouseX, mouseY);
   cam.show();
+
   cam.render();
 
 }
