@@ -185,6 +185,15 @@ class Cam {
   }
 
   render() {
+    
+    // floor
+    for (var i = 0; i <= 20; i++) {
+      fill(200 - i*10);
+      noStroke();
+      rect(height, height - i * 10, height * 2, 10);
+    }
+    
+    // walls
     for (var i = 0; i < this.raysCount; i++) {
       var dist = this.rays[i].castDistance;
 
