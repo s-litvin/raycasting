@@ -239,6 +239,7 @@ function draw() {
   let s = 'Use the keyboard arrows to move the camera. Use the mouse to rotate the camera.';
   fill(230);
   text(s, 10, 10, 270, 80);
+  text("FPS: " + Math.floor(frameRate()), 10, 60);
 
   for (var i = 0; i < walls.length; i++) {
     walls[i].show();
