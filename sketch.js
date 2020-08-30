@@ -187,10 +187,10 @@ class Cam {
   render() {
     
     // floor
-    for (var i = 0; i <= 20; i++) {
-      fill(200 - i*10);
+    for (var i = 0; i <= 40; i++) {
+      fill(80 - i);
       noStroke();
-      rect(height, height - i * 10, height * 2, 10);
+      rect(height, height - i*4, height * 2, 4);
     }
     
     // walls
