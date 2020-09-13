@@ -42,7 +42,7 @@ class Ray {
     const y3 = this.pos.y;
     const y4 = this.pos.y + this.direction.y;
 
-    var den = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+    let den = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
     if (den == 0) {
       return null;
     }
@@ -65,7 +65,7 @@ class Ray {
     }
 
     if (t > 0 && t < 1 && u > 0) {
-      var vector = createVector(x1 + t * (x2 - x1), y1 + t * (y2 - y1));
+      let vector = createVector(x1 + t * (x2 - x1), y1 + t * (y2 - y1));
       return vector;
     }
 
@@ -90,12 +90,12 @@ class Cam {
 
     this.rays = [];
 
-    for (var i = this.raysCount / 2 * -1; i <= 0; i++) {
-      var newRay = new Ray(this.pos.x, this.pos.y, i);
+    for (let i = this.raysCount / 2 * -1; i <= 0; i++) {
+      let newRay = new Ray(this.pos.x, this.pos.y, i);
       this.rays.push(newRay);
     }
-    for (var i = 1; i < this.raysCount / 2; i++) {
-      var newRay = new Ray(this.pos.x, this.pos.y, i);
+    for (let i = 1; i < this.raysCount / 2; i++) {
+      let newRay = new Ray(this.pos.x, this.pos.y, i);
       this.rays.push(newRay);
     }
 
@@ -134,8 +134,8 @@ class Cam {
   }
 
   show() {
-    for (var rayNumber = 0; rayNumber < this.raysCount; rayNumber++) {
-      var ray = this.rays[rayNumber];
+    for (let rayNumber = 0; rayNumber < this.raysCount; rayNumber++) {
+      let ray = this.rays[rayNumber];
       ray.show();
       this.castWalls(rayNumber);
     }
@@ -145,18 +145,18 @@ class Cam {
   }
   
   castWalls(rayNumber) {
-      var closestPoint = null;
-      var closestDistance = 999999;
-      var ray = this.rays[rayNumber];
+      let closestPoint = null;
+      let closestDistance = 999999;
+      let ray = this.rays[rayNumber];
     
-      for (var w = 0; w < walls.length; w++) {
+      for (let w = 0; w < walls.length; w++) {
         const intersectPoint = ray.cast(walls[w]);
 
         if (intersectPoint == null) {
           continue;
         }
 
-        var distance = this.pos.dist(intersectPoint);
+        let distance = this.pos.dist(intersectPoint);
 
         if (closestPoint != null) {
           if (distance <= closestDistance) {
@@ -178,7 +178,7 @@ class Cam {
   }
 
   updateRays(x, y) {
-    for (var i = 0; i < this.raysCount; i++) {
+    for (let i = 0; i < this.raysCount; i++) {
       this.rays[i].pos = this.pos;
       this.rays[i].lookAt(x, y);
     }
@@ -187,31 +187,31 @@ class Cam {
   render() {
     
     // floor
-    for (var i = 0; i <= 40; i++) {
+    for (let i = 0; i <= 40; i++) {
       fill(80 - i);
       noStroke();
       rect(height, height - i*4, height * 2, 4);
     }
     
     // walls
-    for (var i = 0; i < this.raysCount; i++) {
-      var dist = this.rays[i].castDistance;
+    for (let i = 0; i < this.raysCount; i++) {
+      let dist = this.rays[i].castDistance;
 
       fill(255 - dist * 0.3 * height / 200);
       noStroke();
 
-      var pos_x = height + i * height / this.raysCount;
-      var _height = height * 100 * 1 / dist;
-      var pos_y = (height - _height) / 2;
-      var _width = height / this.raysCount;
+      let pos_x = height + i * height / this.raysCount;
+      let _height = height * 100 * 1 / dist;
+      let pos_y = (height - _height) / 2;
+      let _width = height / this.raysCount;
 
       rect(pos_x, pos_y, _width, _height);
     }
   }
 }
 
-var walls = [];
-var cam;
+let walls = [];
+let cam;
 
 function setup() {
   createCanvas(800, 400);
@@ -241,7 +241,7 @@ function draw() {
   text(s, 10, 10, 270, 80);
   text("FPS: " + Math.floor(frameRate()), 10, 60);
 
-  for (var i = 0; i < walls.length; i++) {
+  for (let i = 0; i < walls.length; i++) {
     walls[i].show();
   }
 
