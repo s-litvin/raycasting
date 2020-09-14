@@ -1,3 +1,59 @@
+var buffer;
+let use_dithering = false;
+
+function customFill(color, pos_x, pos_y, _width, _height) {
+  
+  let color_16_bit = color/16;
+  let M = [
+    [0,  8,  2,  10],
+    [12, 4,  14, 6],
+    [3,  11, 1,  9],
+    [16, 7,  13, 5]
+  ];
+  
+  let max_height = Math.floor(pos_y + _height);
+  let max_width  = Math.floor(pos_x + _width);
+  
+  pos_x = Math.floor(pos_x);
+  pos_y = Math.floor(pos_y);
+  
+  if (pos_x < 0) {
+    pos_x = 0;
+  }
+  
+  if (pos_y < 0) {
+    pos_y = 0;
+  }
+  
+  if (max_height > 399) {
+    max_height = 399;
+  }
+  
+  if (max_width > 400 + 399) {
+    max_width = 400 + 399;
+  }
+
+  for (let h = pos_y; h < max_height; h+=4) {
+    for (let w = pos_x; w < max_width; w+=4) { 
+      
+      for (let m_y = 0; m_y < 4; m_y++) {
+        for (let m_x = 0; m_x < 4; m_x++) {
+          
+          let dw = w + m_x;
+          let dh = h + m_y;
+          
+          if (color_16_bit >= M[m_x][m_y] && dw < pos_x + _width && dh < pos_y + _height) {
+            // buffer[dw][dh] = 1;
+            point(dw, dh);
+          }
+        
+        }
+      }
+      
+    }
+  }
+}
+
 class Wall {
   constructor(x1, y1, x2, y2) {
     this.a = createVector(x1, y1);
@@ -98,7 +154,22 @@ class Cam {
       let newRay = new Ray(this.pos.x, this.pos.y, i);
       this.rays.push(newRay);
     }
-
+    
+    this.initBuffer();
+  }
+  
+  initBuffer() {
+    
+    buffer = new Array(400);  
+    for (let i = 0; i < 400; i++) {
+      buffer[i] = new Array(400);  
+    }
+  
+    for (let i = 0; i < 400; i++) {
+      for (let j = 0; j < 400; j++) {
+        buffer[i][j] = 0;    
+      }
+    }
   }
 
   lookAt(x, y) {
@@ -184,34 +255,54 @@ class Cam {
     }
   }
 
-  render() {
+  render() {    
     
     // floor
-    for (let i = 0; i <= 40; i++) {
-      fill(80 - i);
-      noStroke();
-      rect(height, height - i*4, height * 2, 4);
+    if (!use_dithering) {
+      for (let i = 0; i <= 40; i++) {
+        fill(80 - i);
+        noStroke();
+        rect(height, height - i*4, height * 2, 4);
+      }
     }
     
     // walls
     for (let i = 0; i < this.raysCount; i++) {
       let dist = this.rays[i].castDistance;
-
-      fill(255 - dist * 0.3 * height / 200);
-      noStroke();
-
-      let pos_x = height + i * height / this.raysCount;
+      
+      let pos_x = 400 + i * height / this.raysCount;
       let _height = height * 100 * 1 / dist;
       let pos_y = (height - _height) / 2;
       let _width = height / this.raysCount;
 
-      rect(pos_x, pos_y, _width, _height);
+      let c = 255 - dist * 0.3 * height / 200;
+      
+      if (use_dithering) {
+        stroke(255);
+        customFill(c, pos_x, pos_y, _width, _height, buffer);
+      } else {
+        fill(c);
+        rect(pos_x, pos_y, _width, _height);
+      }
+      
+
     }
+    
+    // for (let i = 0; i < 400; i++) {
+    //   for (let j = 0; j < 400; j++) {
+    //     if (buffer[i][j] == 1) {
+    //       point(i, j);
+    //     }
+    //     buffer[i][j] = 0;
+    //   }
+    // }        
   }
 }
 
+
 let walls = [];
 let cam;
+let checkbox;
 
 function setup() {
   createCanvas(800, 400);
@@ -229,17 +320,24 @@ function setup() {
   walls.push(new Wall(140, 330, 210, 330));
   walls.push(new Wall(140, 330, 80, 330));
 
-  cam = new Cam(340, 360, 40);
+  cam = new Cam(340, 360, 40);  
+  
+  checkbox = createCheckbox('Dithering', false);
+  checkbox.changed(myCheckedEvent);
+  
+}
+
+function myCheckedEvent() {
+  if (this.checked()) {
+    use_dithering = true;
+  } else {
+    use_dithering = false;
+  }
 }
 
 function draw() {
 
   background(0);
-  
-  let s = 'Use the keyboard arrows to move the camera. Use the mouse to rotate the camera.';
-  fill(230);
-  text(s, 10, 10, 270, 80);
-  text("FPS: " + Math.floor(frameRate()), 10, 60);
 
   for (let i = 0; i < walls.length; i++) {
     walls[i].show();
@@ -249,4 +347,10 @@ function draw() {
   cam.lookAt(mouseX, mouseY);
   cam.show();
   cam.render();
+  
+  let s = 'Use the keyboard arrows to move the camera. Use the mouse to rotate the camera.';
+  fill(230);
+  noStroke();
+  text(s, 10, 10, 270, 80);
+  text("FPS: " + Math.floor(frameRate()), 10, 60);
 }
