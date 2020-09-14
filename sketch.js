@@ -1,4 +1,4 @@
-var buffer;
+let buffer;
 let use_dithering = false;
 
 function customFill(color, pos_x, pos_y, _width, _height) {
