@@ -1,57 +1,58 @@
-let buffer;
+var buffer;
 let use_dithering = false;
 
 function customFill(color, pos_x, pos_y, _width, _height) {
-  
-  let color_16_bit = color/16;
+
+  let color_16_bit = color / 16;
   let M = [
     [0,  8,  2,  10],
     [12, 4,  14, 6],
     [3,  11, 1,  9],
     [16, 7,  13, 5]
   ];
-  
+
   let max_height = Math.floor(pos_y + _height);
-  let max_width  = Math.floor(pos_x + _width);
-  
+  let max_width = Math.floor(pos_x + _width);
+
   pos_x = Math.floor(pos_x);
   pos_y = Math.floor(pos_y);
-  
+
   if (pos_x < 0) {
     pos_x = 0;
   }
-  
+
   if (pos_y < 0) {
     pos_y = 0;
   }
-  
+
   if (max_height > 399) {
     max_height = 399;
   }
-  
+
   if (max_width > 400 + 399) {
     max_width = 400 + 399;
   }
 
-  for (let h = pos_y; h < max_height; h+=4) {
-    for (let w = pos_x; w < max_width; w+=4) { 
-      
+  for (let h = pos_y; h < max_height; h += 4) {
+    for (let w = pos_x; w < max_width; w += 4) {
+
       for (let m_y = 0; m_y < 4; m_y++) {
         for (let m_x = 0; m_x < 4; m_x++) {
-          
+
           let dw = w + m_x;
           let dh = h + m_y;
-          
+
           if (color_16_bit >= M[m_x][m_y] && dw < pos_x + _width && dh < pos_y + _height) {
             // buffer[dw][dh] = 1;
-            point(dw, dh);
+            // point(dw, dh);
+            set(dw, dh, 255);
           }
-        
+
         }
       }
-      
     }
   }
+
 }
 
 class Wall {
@@ -84,7 +85,7 @@ class Ray {
     this.direction.x = x - this.pos.x;
     this.direction.y = y - this.pos.y;
     this.direction.normalize();
-    this.rotate(this.heading/1.1);
+    this.rotate(this.heading / 1.1);
   }
 
   cast(wall) {
@@ -154,20 +155,20 @@ class Cam {
       let newRay = new Ray(this.pos.x, this.pos.y, i);
       this.rays.push(newRay);
     }
-    
+
     this.initBuffer();
   }
-  
+
   initBuffer() {
-    
-    buffer = new Array(400);  
+
+    buffer = new Array(400);
     for (let i = 0; i < 400; i++) {
-      buffer[i] = new Array(400);  
+      buffer[i] = new Array(400);
     }
-  
+
     for (let i = 0; i < 400; i++) {
       for (let j = 0; j < 400; j++) {
-        buffer[i][j] = 0;    
+        buffer[i][j] = 0;
       }
     }
   }
@@ -214,38 +215,38 @@ class Cam {
     stroke(255, 100, 100);
     line(this.pos.x, this.pos.y, (this.pos.x + this.direction.x * 24), (this.pos.y + this.direction.y * 24));
   }
-  
+
   castWalls(rayNumber) {
-      let closestPoint = null;
-      let closestDistance = 999999;
-      let ray = this.rays[rayNumber];
-    
-      for (let w = 0; w < walls.length; w++) {
-        const intersectPoint = ray.cast(walls[w]);
+    let closestPoint = null;
+    let closestDistance = 999999;
+    let ray = this.rays[rayNumber];
 
-        if (intersectPoint == null) {
-          continue;
-        }
+    for (let w = 0; w < walls.length; w++) {
+      const intersectPoint = ray.cast(walls[w]);
 
-        let distance = this.pos.dist(intersectPoint);
+      if (intersectPoint == null) {
+        continue;
+      }
 
-        if (closestPoint != null) {
-          if (distance <= closestDistance) {
-            closestDistance = distance;
-            closestPoint = intersectPoint;
-          }
-        } else {
+      let distance = this.pos.dist(intersectPoint);
+
+      if (closestPoint != null) {
+        if (distance <= closestDistance) {
           closestDistance = distance;
           closestPoint = intersectPoint;
         }
+      } else {
+        closestDistance = distance;
+        closestPoint = intersectPoint;
       }
+    }
 
-      if (closestPoint != null) {
-        fill(255, 100, 100);
-        ellipse(closestPoint.x, closestPoint.y, 3, 3);
-        line(this.pos.x, this.pos.y, closestPoint.x, closestPoint.y);
-        this.rays[rayNumber].castDistance = closestDistance;
-      }
+    if (closestPoint != null) {
+      fill(255, 100, 100);
+      ellipse(closestPoint.x, closestPoint.y, 3, 3);
+      line(this.pos.x, this.pos.y, closestPoint.x, closestPoint.y);
+      this.rays[rayNumber].castDistance = closestDistance;
+    }
   }
 
   updateRays(x, y) {
@@ -255,47 +256,49 @@ class Cam {
     }
   }
 
-  render() {    
-    
+  render() {
     // floor
     if (!use_dithering) {
       for (let i = 0; i <= 40; i++) {
         fill(80 - i);
         noStroke();
-        rect(height, height - i*4, height * 2, 4);
+        rect(height, height - i * 4, height * 2, 4);
       }
-    }
-    
-    // walls
-    for (let i = 0; i < this.raysCount; i++) {
-      let dist = this.rays[i].castDistance;
-      
-      let pos_x = 400 + i * height / this.raysCount;
-      let _height = height * 100 * 1 / dist;
-      let pos_y = (height - _height) / 2;
-      let _width = height / this.raysCount;
 
-      let c = 255 - dist * 0.3 * height / 200;
-      
-      if (use_dithering) {
-        stroke(255);
-        customFill(c, pos_x, pos_y, _width, _height, buffer);
-      } else {
+      // walls
+      for (let i = 0; i < this.raysCount; i++) {
+        let dist = this.rays[i].castDistance;
+
+        let pos_x = 400 + i * height / this.raysCount;
+        let _height = height * 100 * 1 / dist;
+        let pos_y = (height - _height) / 2;
+        let _width = height / this.raysCount;
+
+        let c = 255 - dist * 0.3 * height / 200;
+
         fill(c);
         rect(pos_x, pos_y, _width, _height);
       }
-      
+    } else {
+      loadPixels();
+      // walls
+      for (let i = 0; i < this.raysCount; i++) {
+        let dist = this.rays[i].castDistance;
 
+        let pos_x = 400 + i * height / this.raysCount;
+        let _height = height * 100 * 1 / dist;
+        let pos_y = (height - _height) / 2;
+        let _width = height / this.raysCount;
+
+        let c = 255 - dist * 0.3 * height / 200;
+
+        stroke(255);
+        customFill(c, pos_x, pos_y, _width, _height, buffer);
+      }
+      
+       updatePixels();
     }
-    
-    // for (let i = 0; i < 400; i++) {
-    //   for (let j = 0; j < 400; j++) {
-    //     if (buffer[i][j] == 1) {
-    //       point(i, j);
-    //     }
-    //     buffer[i][j] = 0;
-    //   }
-    // }        
+
   }
 }
 
@@ -315,16 +318,16 @@ function setup() {
   walls.push(new Wall(280, 110, 280, 330));
   walls.push(new Wall(280, 110, 350, 110));
   walls.push(new Wall(220, 110, 280, 110));
-  
+
   walls.push(new Wall(140, 110, 140, 330));
   walls.push(new Wall(140, 330, 210, 330));
   walls.push(new Wall(140, 330, 80, 330));
 
-  cam = new Cam(340, 360, 40);  
-  
+  cam = new Cam(340, 360, 40);
+
   checkbox = createCheckbox('Dithering', false);
   checkbox.changed(myCheckedEvent);
-  
+
 }
 
 function myCheckedEvent() {
@@ -347,7 +350,7 @@ function draw() {
   cam.lookAt(mouseX, mouseY);
   cam.show();
   cam.render();
-  
+
   let s = 'Use the keyboard arrows to move the camera. Use the mouse to rotate the camera.';
   fill(230);
   noStroke();
