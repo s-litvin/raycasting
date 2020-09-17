@@ -1,60 +1,3 @@
-var buffer;
-let use_dithering = false;
-
-function customFill(color, pos_x, pos_y, _width, _height) {
-
-  let color_16_bit = color / 16;
-  let M = [
-    [0,  8,  2,  10],
-    [12, 4,  14, 6],
-    [3,  11, 1,  9],
-    [16, 7,  13, 5]
-  ];
-
-  let max_height = Math.floor(pos_y + _height);
-  let max_width = Math.floor(pos_x + _width);
-
-  pos_x = Math.floor(pos_x);
-  pos_y = Math.floor(pos_y);
-
-  if (pos_x < 0) {
-    pos_x = 0;
-  }
-
-  if (pos_y < 0) {
-    pos_y = 0;
-  }
-
-  if (max_height > 399) {
-    max_height = 399;
-  }
-
-  if (max_width > 400 + 399) {
-    max_width = 400 + 399;
-  }
-
-  for (let h = pos_y; h < max_height; h += 4) {
-    for (let w = pos_x; w < max_width; w += 4) {
-
-      for (let m_y = 0; m_y < 4; m_y++) {
-        for (let m_x = 0; m_x < 4; m_x++) {
-
-          let dw = w + m_x;
-          let dh = h + m_y;
-
-          if (color_16_bit >= M[m_x][m_y] && dw < pos_x + _width && dh < pos_y + _height) {
-            // buffer[dw][dh] = 1;
-            // point(dw, dh);
-            set(dw, dh, 255);
-          }
-
-        }
-      }
-    }
-  }
-
-}
-
 class Wall {
   constructor(x1, y1, x2, y2) {
     this.a = createVector(x1, y1);
@@ -156,21 +99,6 @@ class Cam {
       this.rays.push(newRay);
     }
 
-    this.initBuffer();
-  }
-
-  initBuffer() {
-
-    buffer = new Array(400);
-    for (let i = 0; i < 400; i++) {
-      buffer[i] = new Array(400);
-    }
-
-    for (let i = 0; i < 400; i++) {
-      for (let j = 0; j < 400; j++) {
-        buffer[i][j] = 0;
-      }
-    }
   }
 
   lookAt(x, y) {
@@ -280,7 +208,7 @@ class Cam {
         rect(pos_x, pos_y, _width, _height);
       }
     } else {
-      loadPixels();
+
       // walls
       for (let i = 0; i < this.raysCount; i++) {
         let dist = this.rays[i].castDistance;
@@ -293,22 +221,96 @@ class Cam {
         let c = 255 - dist * 0.3 * height / 200;
 
         stroke(255);
-        customFill(c, pos_x, pos_y, _width, _height, buffer);
+        spriteFill(c, pos_x, _height);
       }
-      
-       updatePixels();
     }
 
   }
+}
+
+function spriteFill(color, pos_x, _height) {
+    
+  color = (Math.floor(color*16/255) + 1) * 16;
+  _height = Math.floor((400 - _height) / 2);
+
+  image(pg, pos_x, 0, 10, 400 - _height, color, 0, 10, 400 - _height);
+  noStroke();
+  fill(0);
+  rect(pos_x, 0, pos_x + 10, _height);
+}
+
+function drawSprites() {
+  pg.background(255);
+  pg.fill(22);
+  for (let i = 0; i < 16; i++) {
+    fillWithDithering(255 - i * 16 , i * 16, 0, 16, 400);
+  }
+}
+
+function fillWithDithering(color, pos_x, pos_y, _width, _height) {
+
+  let color_16_bit = color / 16;
+  let M = [
+    [0,  8,  2,  10],
+    [12, 4,  14, 6],
+    [3,  11, 1,  9],
+    [16, 7,  13, 5]
+  ];
+
+  let max_height = Math.floor(pos_y + _height);
+  let max_width = Math.floor(pos_x + _width);
+
+  pos_x = Math.floor(pos_x);
+  pos_y = Math.floor(pos_y);
+
+  if (pos_x < 0) {
+    pos_x = 0;
+  }
+
+  if (pos_y < 0) {
+    pos_y = 0;
+  }
+
+  if (max_height > 399) {
+    max_height = 399;
+  }
+
+  if (max_width > 400 + 399) {
+    max_width = 400 + 399;
+  }
+
+  for (let h = pos_y; h < max_height; h += 4) {
+    for (let w = pos_x; w < max_width; w += 4) {
+
+      for (let m_y = 0; m_y < 4; m_y++) {
+        for (let m_x = 0; m_x < 4; m_x++) {
+
+          let dw = w + m_x;
+          let dh = h + m_y;
+
+          if (color_16_bit >= M[m_x][m_y] && dw < pos_x + _width && dh < pos_y + _height) {
+            pg.point(dw, dh);
+          }
+
+        }
+      }
+    }
+  }
+
 }
 
 
 let walls = [];
 let cam;
 let checkbox;
+let pg;
+let use_dithering = false;
 
 function setup() {
   createCanvas(800, 400);
+  pg = createGraphics(260, 400);
+  
+  drawSprites();
 
   walls.push(new Wall(0, 0, 0, 400));
   walls.push(new Wall(0, 0, 400, 0));
@@ -327,7 +329,7 @@ function setup() {
 
   checkbox = createCheckbox('Dithering', false);
   checkbox.changed(myCheckedEvent);
-
+  
 }
 
 function myCheckedEvent() {
@@ -337,6 +339,7 @@ function myCheckedEvent() {
     use_dithering = false;
   }
 }
+
 
 function draw() {
 
@@ -350,7 +353,7 @@ function draw() {
   cam.lookAt(mouseX, mouseY);
   cam.show();
   cam.render();
-
+  
   let s = 'Use the keyboard arrows to move the camera. Use the mouse to rotate the camera.';
   fill(230);
   noStroke();
