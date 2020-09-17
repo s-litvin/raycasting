@@ -230,7 +230,7 @@ class Cam {
 
 function spriteFill(color, pos_x, _height) {
     
-  color = (Math.floor(color*16/255) + 1) * 16;
+  color = Math.floor(color*16/255) * 16;
   _height = Math.floor((400 - _height) / 2);
 
   image(pg, pos_x, 0, 10, 400 - _height, color, 0, 10, 400 - _height);
