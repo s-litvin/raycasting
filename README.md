@@ -7,7 +7,7 @@ For monochrome displays I added ordered dithering algorithm for rendering.
 ## Demo
 Control the camera view with the keyboard arrow and the mouse.
 
-Check demo on GitHub page: https://s-litvin.github.io/raycasting/
+Check this demo on GitHub page: https://s-litvin.github.io/raycasting/
 
 ![alt text](https://raw.githubusercontent.com/s-litvin/raycasting/master/preview.png)
 
