@@ -13,3 +13,8 @@ Check this demo on GitHub page: https://s-litvin.github.io/raycasting/
 
 Or, you can enable 'Dither' effect for monochrome dislays:
 ![alt text](https://raw.githubusercontent.com/s-litvin/raycasting/master/preview2.png)
+
+
+
+
+2023
