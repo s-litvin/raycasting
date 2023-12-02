@@ -17,4 +17,4 @@ Or, you can enable 'Dither' effect for monochrome dislays:
 
 
 
-2023
+© 2023
