@@ -25,52 +25,38 @@ class Ray {
   }
 
   lookAt(x, y) {
-    this.direction.x = x - this.pos.x;
-    this.direction.y = y - this.pos.y;
+    this.direction.set(x - this.pos.x, y - this.pos.y);
     this.direction.normalize();
     this.rotate(this.heading / 1.1);
   }
 
   cast(wall) {
     const x1 = wall.a.x;
-    const x2 = wall.b.x;
     const y1 = wall.a.y;
+    const x2 = wall.b.x;
     const y2 = wall.b.y;
 
     const x3 = this.pos.x;
-    const x4 = this.pos.x + this.direction.x;
     const y3 = this.pos.y;
-    const y4 = this.pos.y + this.direction.y;
+    const x4 = x3 + this.direction.x;
+    const y4 = y3 + this.direction.y;
 
-    let den = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-    if (den == 0) {
-      return null;
-    }
+    const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    if (den === 0) return null; // Линии параллельны
 
     const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
-
-    if (t == 0) {
-      return null;
-    }
-
-    den = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-    if (den == 0) {
-      return null;
-    }
-
-    const u = -1 * (((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den);
-
-    if (u == 0) {
-      return null;
-    }
+    const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
     if (t > 0 && t < 1 && u > 0) {
-      let vector = createVector(x1 + t * (x2 - x1), y1 + t * (y2 - y1));
-      return vector;
+      return createVector(
+          x1 + t * (x2 - x1),
+          y1 + t * (y2 - y1)
+      );
     }
 
     return null;
   }
+
 
   rotate(degree) {
     const tmpX = this.direction.x;
@@ -110,27 +96,16 @@ class Cam {
   }
 
   move() {
-    if (keyIsPressed === false) {
-      return;
-    }
+    if (!keyIsPressed) return;
 
-    if (keyCode === UP_ARROW) {
-      if (this.pos.y - 3 > 0) {
-        this.pos.y -= 3;
-      }
-    } else if (keyCode === DOWN_ARROW) {
-      if (this.pos.y + 3 < height) {
-        this.pos.y += 3;
-      }
-    } else if (keyCode === LEFT_ARROW) {
-      if (this.pos.x - 3 > 0) {
-        this.pos.x -= 3;
-      }
-    } else if (keyCode === RIGHT_ARROW) {
-      if (this.pos.x + 3 < width) {
-        this.pos.x += 3;
-      }
-    }
+    const step = createVector(0, 0);
+
+    if (keyCode === UP_ARROW && this.pos.y > 3) step.y = -3;
+    if (keyCode === DOWN_ARROW && this.pos.y < height - 3) step.y = 3;
+    if (keyCode === LEFT_ARROW && this.pos.x > 3) step.x = -3;
+    if (keyCode === RIGHT_ARROW && this.pos.x < width - 3) step.x = 3;
+
+    this.pos.add(step);
   }
 
   show() {
@@ -141,7 +116,12 @@ class Cam {
     }
 
     stroke(255, 100, 100);
-    line(this.pos.x, this.pos.y, (this.pos.x + this.direction.x * 24), (this.pos.y + this.direction.y * 24));
+    line(
+        this.pos.x,
+        this.pos.y,
+        this.pos.x + this.direction.x * 24,
+        this.pos.y + this.direction.y * 24
+    );
   }
 
   castWalls(rayNumber) {
@@ -229,7 +209,7 @@ class Cam {
 }
 
 function spriteFill(color, pos_x, _height) {
-    
+
   color = Math.floor(color*16/255) * 16;
   _height = Math.floor((400 - _height) / 2);
 
@@ -309,7 +289,7 @@ let use_dithering = false;
 function setup() {
   createCanvas(800, 400);
   pg = createGraphics(260, 400);
-  
+
   drawSprites();
 
   walls.push(new Wall(0, 0, 0, 400));
@@ -329,7 +309,7 @@ function setup() {
 
   checkbox = createCheckbox('Dithering', false);
   checkbox.changed(myCheckedEvent);
-  
+
 }
 
 function myCheckedEvent() {
@@ -353,7 +333,7 @@ function draw() {
   cam.lookAt(mouseX, mouseY);
   cam.show();
   cam.render();
-  
+
   let s = 'Use the keyboard arrows to move the camera. Use the mouse to rotate the camera.';
   fill(230);
   noStroke();
